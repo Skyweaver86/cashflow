@@ -75,24 +75,24 @@ function addIncome() {
         $income_date = $_POST['income_date'] ?? date('Y-m-d');
         $recurring = isset($_POST['recurring']) ? 1 : 0;
         $recurring_frequency = $_POST['recurring_frequency'] ?? null;
-        
+
         if ($amount <= 0) {
             echo json_encode(['success' => false, 'message' => 'Invalid amount']);
             return;
         }
-        
+
         $db = getDB();
-        
+
         $stmt = $db->prepare("INSERT INTO income (user_id, category_id, user_category_id, amount, description, income_date, recurring, recurring_frequency) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([$user_id, $category_id, $user_category_id, $amount, $description, $income_date, $recurring, $recurring_frequency]);
-        
+
         $income_id = $db->lastInsertId();
-        
+
         // Log to history
         logHistory($user_id, 'income', $income_id, 'created', null, json_encode($_POST));
-        
+
         echo json_encode(['success' => true, 'message' => 'Income added successfully', 'income_id' => $income_id]);
-        
+
     } catch (PDOException $e) {
         echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
     }
@@ -108,27 +108,27 @@ function addExpense() {
         $expense_date = $_POST['expense_date'] ?? date('Y-m-d');
         $recurring = isset($_POST['recurring']) ? 1 : 0;
         $recurring_frequency = $_POST['recurring_frequency'] ?? null;
-        
+
         if ($amount <= 0) {
             echo json_encode(['success' => false, 'message' => 'Invalid amount']);
             return;
         }
-        
+
         $db = getDB();
-        
+
         $stmt = $db->prepare("INSERT INTO expenses (user_id, category_id, user_category_id, amount, description, expense_date, recurring, recurring_frequency) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([$user_id, $category_id, $user_category_id, $amount, $description, $expense_date, $recurring, $recurring_frequency]);
-        
+
         $expense_id = $db->lastInsertId();
-        
+
         // Log to history
         logHistory($user_id, 'expense', $expense_id, 'created', null, json_encode($_POST));
-        
+
         // Check budget warnings
         checkBudgetWarnings($user_id, $category_id, $user_category_id);
-        
+
         echo json_encode(['success' => true, 'message' => 'Expense added successfully', 'expense_id' => $expense_id]);
-        
+
     } catch (PDOException $e) {
         echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
     }
@@ -141,13 +141,13 @@ function getTransactions() {
         $start_date = $_GET['start_date'] ?? date('Y-m-01');
         $end_date = $_GET['end_date'] ?? date('Y-m-t');
         $limit = intval($_GET['limit'] ?? 100);
-        
+
         $db = getDB();
         $transactions = [];
-        
+
         if ($type === 'all' || $type === 'income') {
             $stmt = $db->prepare("
-                SELECT i.*, 
+                SELECT i.*,
                        COALESCE(pc.category_name, uc.category_name) as category_name,
                        COALESCE(pc.icon, uc.icon) as icon,
                        'income' as type
@@ -161,10 +161,10 @@ function getTransactions() {
             $stmt->execute([$user_id, $start_date, $end_date, $limit]);
             $transactions = array_merge($transactions, $stmt->fetchAll());
         }
-        
+
         if ($type === 'all' || $type === 'expense') {
             $stmt = $db->prepare("
-                SELECT e.*, 
+                SELECT e.*,
                        COALESCE(pc.category_name, uc.category_name) as category_name,
                        COALESCE(pc.icon, uc.icon) as icon,
                        'expense' as type
@@ -178,16 +178,16 @@ function getTransactions() {
             $stmt->execute([$user_id, $start_date, $end_date, $limit]);
             $transactions = array_merge($transactions, $stmt->fetchAll());
         }
-        
+
         // Sort by date
         usort($transactions, function($a, $b) {
             $dateA = $a['income_date'] ?? $a['expense_date'];
             $dateB = $b['income_date'] ?? $b['expense_date'];
             return strtotime($dateB) - strtotime($dateA);
         });
-        
+
         echo json_encode(['success' => true, 'transactions' => $transactions]);
-        
+
     } catch (PDOException $e) {
         echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
     }
@@ -197,9 +197,9 @@ function getSummary() {
     try {
         $user_id = $_SESSION['user_id'];
         $period = $_GET['period'] ?? 'month'; // month, year, all
-        
+
         $db = getDB();
-        
+
         // Calculate date range
         switch ($period) {
             case 'month':
@@ -214,20 +214,20 @@ function getSummary() {
                 $start_date = '2000-01-01';
                 $end_date = '2099-12-31';
         }
-        
+
         // Total income
         $stmt = $db->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM income WHERE user_id = ? AND income_date BETWEEN ? AND ?");
         $stmt->execute([$user_id, $start_date, $end_date]);
         $total_income = $stmt->fetch()['total'];
-        
+
         // Total expenses
         $stmt = $db->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND expense_date BETWEEN ? AND ?");
         $stmt->execute([$user_id, $start_date, $end_date]);
         $total_expenses = $stmt->fetch()['total'];
-        
+
         // Balance
         $balance = $total_income - $total_expenses;
-        
+
         // Category breakdown for expenses
         $stmt = $db->prepare("
             SELECT COALESCE(pc.category_name, uc.category_name, 'Uncategorized') as category,
@@ -242,10 +242,10 @@ function getSummary() {
         ");
         $stmt->execute([$user_id, $start_date, $end_date]);
         $expense_by_category = $stmt->fetchAll();
-        
+
         // Convert to user's preferred currency if needed
         $user_currency = $_SESSION['currency'] ?? 'PHP';
-        $base_currency = 'USD';
+        $base_currency = 'PHP';
         $conversion_rate = 1.0;
         try {
             if ($user_currency !== $base_currency) {
@@ -277,7 +277,7 @@ function getSummary() {
                 'conversion_rate' => $conversion_rate
             ]
         ]);
-        
+
     } catch (PDOException $e) {
         echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
     }
@@ -332,21 +332,21 @@ function addUserCategory() {
         $category_type = $_POST['category_type'] ?? 'expense';
         $icon = $_POST['icon'] ?? 'default';
         $color = $_POST['color'] ?? '#EB5002';
-        
+
         if (empty($category_name)) {
             echo json_encode(['success' => false, 'message' => 'Category name is required']);
             return;
         }
-        
+
         $db = getDB();
-        
+
         $stmt = $db->prepare("INSERT INTO user_categories (user_id, category_name, category_type, icon, color) VALUES (?, ?, ?, ?, ?)");
         $stmt->execute([$user_id, $category_name, $category_type, $icon, $color]);
-        
+
         $category_id = $db->lastInsertId();
-        
+
         echo json_encode(['success' => true, 'message' => 'Category added successfully', 'category_id' => $category_id]);
-        
+
     } catch (PDOException $e) {
         echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
     }
@@ -384,25 +384,25 @@ function getIncomeExpenseComparison() {
     try {
         $user_id = $_SESSION['user_id'];
         $months = intval($_GET['months'] ?? 6);
-        
+
         $db = getDB();
         $comparison = [];
-        
+
         for ($i = $months - 1; $i >= 0; $i--) {
             $month = date('Y-m', strtotime("-$i months"));
             $start_date = $month . '-01';
             $end_date = date('Y-m-t', strtotime($start_date));
-            
+
             // Get income
             $stmt = $db->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM income WHERE user_id = ? AND income_date BETWEEN ? AND ?");
             $stmt->execute([$user_id, $start_date, $end_date]);
             $income = $stmt->fetch()['total'];
-            
+
             // Get expenses
             $stmt = $db->prepare("SELECT COALESCE(SUM(amount), 0) as total FROM expenses WHERE user_id = ? AND expense_date BETWEEN ? AND ?");
             $stmt->execute([$user_id, $start_date, $end_date]);
             $expenses = $stmt->fetch()['total'];
-            
+
             $comparison[] = [
                 'month' => date('M Y', strtotime($month)),
                 'income' => floatval($income),
@@ -410,9 +410,9 @@ function getIncomeExpenseComparison() {
                 'net' => floatval($income - $expenses)
             ];
         }
-        
+
         echo json_encode(['success' => true, 'comparison' => $comparison]);
-        
+
     } catch (PDOException $e) {
         echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
     }
@@ -426,9 +426,9 @@ function updateTransaction() {
         $amount = floatval($_POST['amount'] ?? 0);
         $description = trim($_POST['description'] ?? '');
         $date = $_POST['date'] ?? date('Y-m-d');
-        
+
         $db = getDB();
-        
+
         if ($type === 'income') {
             $stmt = $db->prepare("UPDATE income SET amount = ?, description = ?, income_date = ? WHERE income_id = ? AND user_id = ?");
             $stmt->execute([$amount, $description, $date, $transaction_id, $user_id]);
@@ -436,11 +436,11 @@ function updateTransaction() {
             $stmt = $db->prepare("UPDATE expenses SET amount = ?, description = ?, expense_date = ? WHERE expense_id = ? AND user_id = ?");
             $stmt->execute([$amount, $description, $date, $transaction_id, $user_id]);
         }
-        
+
         logHistory($user_id, $type, $transaction_id, 'updated', null, json_encode($_POST));
-        
+
         echo json_encode(['success' => true, 'message' => 'Transaction updated successfully']);
-        
+
     } catch (PDOException $e) {
         echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
     }
@@ -451,20 +451,20 @@ function deleteTransaction() {
         $user_id = $_SESSION['user_id'];
         $transaction_id = intval($_POST['transaction_id'] ?? 0);
         $type = $_POST['type'] ?? '';
-        
+
         $db = getDB();
-        
+
         if ($type === 'income') {
             $stmt = $db->prepare("DELETE FROM income WHERE income_id = ? AND user_id = ?");
         } else {
             $stmt = $db->prepare("DELETE FROM expenses WHERE expense_id = ? AND user_id = ?");
         }
         $stmt->execute([$transaction_id, $user_id]);
-        
+
         logHistory($user_id, $type, $transaction_id, 'deleted', null, null);
-        
+
         echo json_encode(['success' => true, 'message' => 'Transaction deleted successfully']);
-        
+
     } catch (PDOException $e) {
         echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
     }
@@ -485,18 +485,18 @@ function checkBudgetWarnings($user_id, $category_id, $user_category_id) {
         $db = getDB();
         $current_month_start = date('Y-m-01');
         $current_month_end = date('Y-m-t');
-        
+
         // Check if there's a budget for this category
         $stmt = $db->prepare("
-            SELECT budget_id, budget_amount 
-            FROM budgets 
-            WHERE user_id = ? 
+            SELECT budget_id, budget_amount
+            FROM budgets
+            WHERE user_id = ?
             AND (category_id = ? OR user_category_id = ?)
             AND start_date <= ? AND end_date >= ?
         ");
         $stmt->execute([$user_id, $category_id, $user_category_id, $current_month_start, $current_month_end]);
         $budget = $stmt->fetch();
-        
+
         if ($budget) {
             // Calculate total expenses for this category
             $stmt = $db->prepare("
@@ -508,12 +508,12 @@ function checkBudgetWarnings($user_id, $category_id, $user_category_id) {
             ");
             $stmt->execute([$user_id, $category_id, $user_category_id, $current_month_start, $current_month_end]);
             $total_spent = $stmt->fetch()['total'];
-            
+
             // If over 80% of budget, create notification
             if ($total_spent >= ($budget['budget_amount'] * 0.8)) {
                 $percentage = round(($total_spent / $budget['budget_amount']) * 100);
                 $message = "You've spent {$percentage}% of your budget for this category";
-                
+
                 $stmt = $db->prepare("INSERT INTO notifications (user_id, notification_type, message, related_id) VALUES (?, 'budget_warning', ?, ?)");
                 $stmt->execute([$user_id, $message, $budget['budget_id']]);
             }
