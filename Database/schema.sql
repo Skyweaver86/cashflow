@@ -1,10 +1,3 @@
--- CashFlow Personal Finance Management Tool Database Schema
--- Created: 2026
-
--- Drop existing database if exists
-DROP DATABASE IF EXISTS cashflow_db;
-CREATE DATABASE cashflow_db;
-USE cashflow_db;
 
 -- Users Table
 CREATE TABLE users (
@@ -148,7 +141,6 @@ CREATE TABLE family_sharing (
     share_percentage DECIMAL(5, 2) DEFAULT 50.00,
     status ENUM('pending', 'accepted', 'declined') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (bill_id) REFERENCES monthly_bills(bill_id) ON DELETE CASCADE,
     FOREIGN KEY (owner_user_id) REFERENCES users(user_id) ON DELETE CASCADE,
     FOREIGN KEY (shared_with_user_id) REFERENCES users(user_id) ON DELETE CASCADE

@@ -18,4 +18,5 @@ COPY . /var/www/html/
 RUN mkdir -p /var/www/html/Frontend/uploads/avatars && \
     chown -R www-data:www-data /var/www/html/Frontend/uploads
 
+    RUN echo '<Directory /var/www/html/Frontend>\n\tDirectoryIndex index.html\n</Directory>' >> /etc/apache2/apache2.conf
 EXPOSE 80
