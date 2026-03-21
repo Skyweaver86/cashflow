@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CashFlow — Personal Finance</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="theme-starbucks">
+
+<!-- ============ AUTH SCREEN ============ -->
+<div id="auth-screen" class="auth-screen">
+  <div class="auth-container">
+    <div class="auth-logo">
+      <div class="logo-icon"><i class="fas fa-leaf"></i></div>
+      <div class="logo-gradient">
+        <h1>CashFlow</h1>
+        <p>Your smart personal finance companion</p>
+      </div>
+    </div>
+
+    <!-- Login -->
+    <div id="login-form" class="auth-form active">
+      <h2>Welcome back</h2>
+      <form id="loginForm">
+        <div class="form-group">
+          <i class="fas fa-user"></i>
+          <input type="text" id="login-username" placeholder="Username or Email" required>
+        </div>
+        <div class="form-group" style="position:relative;">
+          <input type="password" id="login-password" placeholder="Password" required style="padding:13px 42px 13px 14px;width:100%;border:1.5px solid var(--bd-default);border-radius:var(--r-md);font-size:0.93rem;font-family:var(--font-body);background:var(--bg-raised);color:var(--tx-primary);">
+          <button type="button" onclick="togglePw('login-password',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--tx-muted);font-size:0.9rem;padding:0;"><i class="fas fa-eye"></i></button>
+        </div>
+        <button type="submit" class="btn-primary">Sign In</button>
+      </form>
+      <p class="auth-switch">No account? <a href="#" onclick="switchToRegister()">Create one here</a></p>
+    </div>
+
+    <!-- Register -->
+    <div id="register-form" class="auth-form">
+      <h2>Create account</h2>
+      <form id="registerForm">
+        <div class="form-group">
+          <i class="fas fa-id-card"></i>
+          <input type="text" id="register-fullname" placeholder="Full Name" required>
+        </div>
+        <div class="form-group">
+          <i class="fas fa-user"></i>
+          <input type="text" id="register-username" placeholder="Username" required>
+        </div>
+        <div class="form-group">
+          <i class="fas fa-envelope"></i>
+          <input type="email" id="register-email" placeholder="Email" required>
+        </div>
+        <div class="form-group" style="position:relative;">
+          <input type="password" id="register-password" placeholder="Password (min 6 characters)" required style="padding:13px 42px 13px 14px;width:100%;border:1.5px solid var(--bd-default);border-radius:var(--r-md);font-size:0.93rem;font-family:var(--font-body);background:var(--bg-raised);color:var(--tx-primary);">
+          <button type="button" onclick="togglePw('register-password',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--tx-muted);font-size:0.9rem;padding:0;"><i class="fas fa-eye"></i></button>
+        </div>
+        <div class="form-group">
+          <i class="fas fa-coins"></i>
+          <select id="register-currency">
+            <option value="USD">USD — US Dollar</option>
+            <option value="EUR">EUR — Euro</option>
+            <option value="GBP">GBP — British Pound</option>
+            <option value="PHP" selected>PHP — Philippine Peso</option>
+            <option value="JPY">JPY — Japanese Yen</option>
+            <option value="AUD">AUD — Australian Dollar</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-primary">Create Account</button>
+      </form>
+      <p class="auth-switch">Have an account? <a href="#" onclick="switchToLogin()">Sign in</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ============ APP SCREEN ============ -->
+<div id="app-screen" class="app-screen" style="display:none;">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo-wrap" style="display:flex;align-items:center;gap:10px;">
+        <div class="sidebar-logo-icon">
+          <i class="fas fa-leaf" style="font-size:1rem;"></i>
+        </div>
+        <div>
+          <h2 class="logo">CashFlow</h2>
+          <div class="sidebar-tagline">Finance, simplified</div>
+        </div>
+      </div>
+      <button class="close-sidebar" onclick="toggleSidebar()"><i class="fas fa-times"></i></button>
+    </div>
+
+    <div class="sidebar-user">
+      <img src="https://ui-avatars.com/api/?name=U&background=00704A&color=fff" id="sidebar-avatar" alt="avatar">
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" id="sidebar-username">User</div>
+        <div class="sidebar-user-role">Personal account</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label">Overview</div>
+      <a href="#" class="nav-item active" data-page="dashboard"><i class="fas fa-home"></i><span>Dashboard</span></a>
+      <a href="#" class="nav-item" data-page="transactions"><i class="fas fa-exchange-alt"></i><span>Transactions</span></a>
+      <div class="sidebar-section-label">Planning</div>
+      <a href="#" class="nav-item" data-page="budgets"><i class="fas fa-wallet"></i><span>Budgets</span></a>
+      <a href="#" class="nav-item" data-page="goals"><i class="fas fa-bullseye"></i><span>Savings Goals</span></a>
+      <a href="#" class="nav-item" data-page="bills"><i class="fas fa-file-invoice-dollar"></i><span>Bills</span><span class="nav-badge" id="bills-badge" style="display:none;">!</span></a>
+      <div class="sidebar-section-label">Analytics</div>
+      <a href="#" class="nav-item" data-page="reports"><i class="fas fa-chart-line"></i><span>Reports</span></a>
+      <a href="#" class="nav-item" data-page="currency"><i class="fas fa-coins"></i><span>Currency</span></a>
+      <div class="sidebar-section-label">Account</div>
+      <a href="#" class="nav-item" data-page="settings"><i class="fas fa-cog"></i><span>Settings</span></a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Sign Out</span></button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <header class="top-header">
+      <div class="header-left">
+        <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+        <div>
+          <h1 id="page-title-el" style="font-family:var(--font-display);font-size:1.45rem;font-weight:600;color:var(--tx-primary);line-height:1.1;">Dashboard</h1>
+          <div id="page-subtitle" style="font-size:0.75rem;color:var(--tx-muted);margin-top:1px;">Here's your financial overview</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="search-wrap">
+          <i class="fas fa-search"></i>
+          <input type="text" class="search-input" id="global-search" placeholder="Search transactions..." oninput="App.handleSearch(this.value)">
+        </div>
+        <button class="icon-btn notification-bell" onclick="toggleNotifications()" title="Notifications">
+          <i class="fas fa-bell"></i>
+          <span class="notification-badge" id="notification-count" style="display:none;">0</span>
+        </button>
+        <div class="user-chip" onclick="App.navigateTo('settings')" title="Go to Settings">
+          <img src="https://ui-avatars.com/api/?name=U&background=00704A&color=fff" id="user-avatar" alt="Profile">
+          <span id="user-name">User</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Notifications Panel -->
+    <div class="notifications-panel" id="notifications-panel" style="display:none;">
+      <div class="notifications-header">
+        <h3>Notifications</h3>
+        <button onclick="markAllNotificationsRead()">Mark all read</button>
+      </div>
+      <div class="notifications-list" id="notifications-list"></div>
+    </div>
+
+    <!-- Page Content -->
+    <div class="page-container" id="page-container"></div>
+  </main>
+</div>
+
+<!-- QUICK ADD FAB -->
+<button class="quick-add-fab" id="quick-add-fab" onclick="App.openQuickAdd()" title="Quick Add" style="display:none;">
+  <i class="fas fa-plus"></i>
+</button>
+
+<!-- QUICK ADD MODAL -->
+<div class="modal" id="quick-add-modal">
+  <div class="modal-content" style="max-width:420px;">
+    <div class="modal-header">
+      <h2>Quick Add Transaction</h2>
+      <button class="modal-close" onclick="App.closeQuickAdd()"><i class="fas fa-times"></i></button>
+    </div>
+    <div style="display:grid;gap:14px;margin-top:4px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <button id="qa-type-expense" class="btn btn-danger" onclick="App.setQAType('expense')" style="justify-content:center;"><i class="fas fa-arrow-down"></i> Expense</button>
+        <button id="qa-type-income" class="btn btn-success" onclick="App.setQAType('income')" style="justify-content:center;opacity:0.45;"><i class="fas fa-arrow-up"></i> Income</button>
+      </div>
+      <div><label>Amount</label><input type="number" id="qa-amount" placeholder="0.00" step="0.01" min="0.01"></div>
+      <div><label>Category</label><select id="qa-category"></select></div>
+      <div><label>Description <span style="color:var(--tx-muted);font-weight:400;">(optional)</span></label><input type="text" id="qa-description" placeholder="What was this for?"></div>
+      <div><label>Date</label><input type="date" id="qa-date"></div>
+      <button class="btn btn-primary" onclick="App.submitQuickAdd()" style="justify-content:center;width:100%;padding:13px;"><i class="fas fa-check"></i> Add Transaction</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT TRANSACTION MODAL -->
+<div class="modal" id="edit-tx-modal">
+  <div class="modal-content" style="max-width:420px;">
+    <div class="modal-header">
+      <h2>Edit Transaction</h2>
+      <button class="modal-close" onclick="Transactions.closeEditModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div style="display:grid;gap:14px;margin-top:4px;">
+      <input type="hidden" id="edit-tx-id">
+      <input type="hidden" id="edit-tx-type">
+      <div><label>Amount</label><input type="number" id="edit-tx-amount" step="0.01" min="0.01"></div>
+      <div><label>Category</label><select id="edit-tx-category"></select></div>
+      <div><label>Description</label><input type="text" id="edit-tx-description"></div>
+      <div><label>Date</label><input type="date" id="edit-tx-date"></div>
+      <button class="btn btn-primary" onclick="Transactions.submitEdit()" style="justify-content:center;width:100%;padding:13px;"><i class="fas fa-save"></i> Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOADING & TOAST -->
+<div class="loading-overlay" id="loading-overlay" style="display:none;"><div class="spinner"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+function togglePw(inputId, btn) {
+  const input = document.getElementById(inputId);
+  const icon = btn.querySelector('i');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.className = 'fas fa-eye-slash';
+  } else {
+    input.type = 'password';
+    icon.className = 'fas fa-eye';
+  }
+}
+</script>
+
+<script src="js/app.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/transactions.js"></script>
+<script src="js/budgets.js"></script>
+<script src="js/goals.js"></script>
+<script src="js/bills.js"></script>
+<script src="js/reports.js"></script>
+<script src="js/currency.js"></script>
+<script src="js/settings.js"></script>
+</body>
+</html>

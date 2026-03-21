@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:80"
+    environment:
+      DB_HOST: db
+      DB_USER: cashflow_user
+      DB_PASS: yourpassword123
+      DB_NAME: cashflow_db
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: cashflow_db
+      MYSQL_USER: cashflow_user
+      MYSQL_PASSWORD: yourpassword123
+      MYSQL_ROOT_PASSWORD: rootpassword123
+    volumes:
+      - cashflow_data:/var/lib/mysql
+      - ./Database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    ports:
+      - "3306:3306"
+
+volumes:
+  cashflow_data:
