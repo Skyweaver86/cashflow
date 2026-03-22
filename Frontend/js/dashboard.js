@@ -102,14 +102,13 @@ const Dashboard = {
             <div id="dash-trend"><div class="skeleton" style="height:150px;border-radius:var(--r-md);"></div></div>
         </div>`;
 
-        // Load all in parallel
-        Promise.all([
-            this.loadSummary(),
-            this.loadRecentTransactions(),
-            this.loadGoalsCount(),
-            this.loadUpcomingBills(),
-            this.loadTrend()
-        ]);
+        // Load summary FIRST to get conversion rate, then load everything else
+        this.loadSummary().then(() => {
+            this.loadRecentTransactions();
+            this.loadUpcomingBills();
+        });
+        this.loadGoalsCount();
+        this.loadTrend();
     },
 
     async loadSummary() {
@@ -126,7 +125,6 @@ const Dashboard = {
             const expenses = data.success ? (parseFloat(data.summary?.total_expenses) || 0) : 0;
             const balance  = data.success ? (parseFloat(data.summary?.balance)        || 0) : 0;
             const cats     = data.success ? (data.summary?.expense_by_category || [])       : [];
-            App._conversionRate = data.success ? (parseFloat(data.summary?.conversion_rate) || 1) : 1;
 
             // Animate the numbers
             const incEl  = document.getElementById('dash-income');
