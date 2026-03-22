@@ -52,6 +52,7 @@ const Bills = {
 
     async loadBills() {
         try {
+            await App.fetchConversionRate();
             const r = await fetch(App.API_BASE + 'bills.php?action=get_bills');
             const d = await App.safeJSON(r);
             const container = document.getElementById('bills-list');

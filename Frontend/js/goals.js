@@ -37,6 +37,7 @@ const Goals = {
 
     async loadGoals() {
         try {
+            await App.fetchConversionRate();
             const r = await fetch(App.API_BASE + 'budgets_goals.php?action=get_goals&status=active');
             const d = await App.safeJSON(r);
             if (!d.success) return;

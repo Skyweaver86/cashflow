@@ -1,5 +1,6 @@
 const App = {
     currentUser: null, currentTheme: 'starbucks', currentPage: 'dashboard',
+    _conversionRate: 1,
     qaType: 'expense', API_BASE: '../Backend/',
 
     init() { this.checkSession(); this.setupEventListeners(); },
@@ -10,7 +11,6 @@ const App = {
             const d = await r.json();
             if (d.logged_in) {
                 this.currentUser = d.user;
-                App._conversionRate = 1;
                 this.currentTheme = d.user.theme || 'starbucks';
                 this.showApp();
                 this.applyTheme(this.currentTheme);
@@ -171,6 +171,23 @@ const App = {
         t.style.borderLeftColor = c[type] || c.info;
         t.classList.add('show');
         setTimeout(() => t.classList.remove('show'), 3500);
+    },
+
+    async fetchConversionRate() {
+        try {
+            const userCurrency = this.currentUser?.currency || 'PHP';
+            if (userCurrency === 'PHP') { this._conversionRate = 1; return 1; }
+            const resp = await fetch(this.API_BASE + 'currency.php?action=convert&amount=1&from=PHP&to=' + userCurrency);
+            const d = await resp.json();
+            if (d.success) {
+                this._conversionRate = parseFloat(d.rate) || 1;
+            } else {
+                this._conversionRate = 1;
+            }
+        } catch(e) {
+            this._conversionRate = 1;
+        }
+        return this._conversionRate;
     },
 
     formatCurrency(amount, currency = null) {
