@@ -54,7 +54,7 @@ const Goals = {
 
             const totalTarget = d.goals.reduce((s, g) => s + parseFloat(g.target_amount), 0);
             const totalSaved = d.goals.reduce((s, g) => s + parseFloat(g.current_amount), 0);
-            if (summary) summary.textContent = `${d.goals.length} goal${d.goals.length>1?'s':''} · ${App.formatCurrency(totalSaved)} saved of ${App.formatCurrency(totalTarget)}`;
+            if (summary) summary.textContent = `${d.goals.length} goal${d.goals.length>1?'s':''} · ${App.formatCurrency(totalSaved * (App._conversionRate || 1))} saved of ${App.formatCurrency(totalTarget * (App._conversionRate || 1))}`;
 
             el.innerHTML = d.goals.map(g => {
                 const pct = Math.min(parseFloat(g.percentage), 100);
@@ -87,14 +87,14 @@ const Goals = {
                                 <span class="badge ${g.priority}">${g.priority}</span>
                             </div>
                             <div style="font-size:0.82rem;color:var(--tx-secondary);">
-                                <strong style="color:var(--tx-primary);">${App.formatCurrency(g.current_amount)}</strong>
-                                of ${App.formatCurrency(g.target_amount)}
+                                <strong style="color:var(--tx-primary);">${App.formatCurrency(g.current_amount * (App._conversionRate || 1))}</strong>
+                                of ${App.formatCurrency(g.target_amount * (App._conversionRate || 1))}
                                 · <span style="color:var(--tx-muted);">${daysLeft}</span>
                             </div>
                             <div class="progress-bar" style="margin-top:8px;">
                                 <div class="progress-fill" style="width:${pct}%;background:${progressColor};"></div>
                             </div>
-                            <div style="font-size:0.78rem;color:var(--tx-muted);margin-top:4px;">${App.formatCurrency(remaining)} remaining</div>
+                            <div style="font-size:0.78rem;color:var(--tx-muted);margin-top:4px;">${App.formatCurrency(remaining * (App._conversionRate || 1))} remaining</div>
                         </div>
 
                         <!-- Actions -->

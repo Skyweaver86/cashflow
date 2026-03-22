@@ -71,7 +71,7 @@ const Bills = {
             const totalDue = d.bills.reduce((s, b) => s + parseFloat(b.amount), 0);
             const paidCount = d.bills.filter(b => b.is_paid).length;
             const unpaidTotal = d.bills.filter(b => !b.is_paid).reduce((s, b) => s + parseFloat(b.amount), 0);
-            if (summary) summary.textContent = `${paidCount}/${d.bills.length} paid · ${App.formatCurrency(unpaidTotal)} outstanding`;
+            if (summary) summary.textContent = `${paidCount}/${d.bills.length} paid · ${App.formatCurrency(unpaidTotal * (App._conversionRate || 1))} outstanding`;
 
             container.innerHTML = d.bills.map(b => {
                 const statusBadge = b.is_paid
@@ -97,7 +97,7 @@ const Bills = {
                             </div>
                         </div>
                         <div style="text-align:right;flex-shrink:0;">
-                            <div style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;color:var(--tx-primary);">${App.formatCurrency(b.amount)}</div>
+                            <div style="font-family:var(--font-display);font-size:1.1rem;font-weight:700;color:var(--tx-primary);">${App.formatCurrency(b.amount * (App._conversionRate || 1))}</div>
                             <div style="margin-top:4px;">${statusBadge}</div>
                         </div>
                         <div style="display:flex;gap:6px;flex-shrink:0;">
@@ -186,8 +186,8 @@ const Bills = {
                             <div style="font-size:0.78rem;color:var(--tx-muted);">Shared by <strong>${s.owner_username}</strong> · Your share: ${s.share_percentage}%</div>
                         </div>
                         <div style="text-align:right;">
-                            <div style="font-weight:700;">${App.formatCurrency(myShare)}</div>
-                            <div style="font-size:0.75rem;color:var(--tx-muted);">of ${App.formatCurrency(s.amount)}</div>
+                            <div style="font-weight:700;">${App.formatCurrency(myShare * (App._conversionRate || 1))}</div>
+                            <div style="font-size:0.75rem;color:var(--tx-muted);">of ${App.formatCurrency(s.amount * (App._conversionRate || 1))}</div>
                         </div>
                         <div style="display:flex;gap:6px;flex-shrink:0;">
                             ${s.status === 'pending' ? `

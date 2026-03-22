@@ -72,7 +72,7 @@ const Budgets = {
             const totalBudgeted = d.budgets.reduce((s, b) => s + b.budget_amount, 0);
             const totalSpent = d.budgets.reduce((s, b) => s + b.spent, 0);
             const overCount = d.budgets.filter(b => b.percentage > 100).length;
-            if (summary) summary.textContent = `${App.formatCurrency(totalSpent)} spent of ${App.formatCurrency(totalBudgeted)}${overCount ? ` · ⚠️ ${overCount} over budget` : ''}`;
+            if (summary) summary.textContent = `${App.formatCurrency(totalSpent * (App._conversionRate || 1))} spent of ${App.formatCurrency(totalBudgeted * (App._conversionRate || 1))}${overCount ? ` · ⚠️ ${overCount} over budget` : ''}`;
 
             container.innerHTML = d.budgets.map(b => {
                 const pct = Math.min(parseFloat(b.percentage), 100);
@@ -89,7 +89,7 @@ const Budgets = {
                             <span style="font-size:0.78rem;color:var(--tx-muted);text-transform:capitalize;">${b.period} budget</span>
                         </div>
                         <div style="text-align:right;">
-                            <div style="font-family:var(--font-display);font-size:1.05rem;font-weight:700;color:var(--tx-primary);">${App.formatCurrency(b.spent)} <span style="font-weight:400;font-size:0.85rem;color:var(--tx-muted);">/ ${App.formatCurrency(b.budget_amount)}</span></div>
+                            <div style="font-family:var(--font-display);font-size:1.05rem;font-weight:700;color:var(--tx-primary);">${App.formatCurrency(b.spent * (App._conversionRate || 1))} <span style="font-weight:400;font-size:0.85rem;color:var(--tx-muted);">/ ${App.formatCurrency(b.budget_amount * (App._conversionRate || 1))}</span></div>
                             <span style="font-size:0.8rem;font-weight:600;color:${color};">${parseFloat(b.percentage).toFixed(0)}% used</span>
                         </div>
                     </div>
@@ -98,7 +98,7 @@ const Budgets = {
                     </div>
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
                         <span style="font-size:0.82rem;color:${overBudget ? 'var(--c-danger)' : 'var(--tx-secondary)'};">
-                            ${overBudget ? `⚠️ Over by ${App.formatCurrency(Math.abs(b.remaining))}` : `${App.formatCurrency(b.remaining)} remaining`}
+                            ${overBudget ? `⚠️ Over by ${App.formatCurrency(Math.abs(b.remaining) * (App._conversionRate || 1))}` : `${App.formatCurrency(b.remaining * (App._conversionRate || 1))} remaining`}
                         </span>
                         <button class="btn btn-danger" onclick="Budgets.deleteBudget(${b.budget_id})" style="padding:5px 10px;font-size:0.78rem;">
                             <i class="fas fa-trash"></i>
