@@ -10,6 +10,7 @@ const App = {
             const d = await r.json();
             if (d.logged_in) {
                 this.currentUser = d.user;
+                App._conversionRate = 1;
                 this.currentTheme = d.user.theme || 'starbucks';
                 this.showApp();
                 this.applyTheme(this.currentTheme);

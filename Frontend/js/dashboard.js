@@ -126,6 +126,7 @@ const Dashboard = {
             const expenses = data.success ? (parseFloat(data.summary?.total_expenses) || 0) : 0;
             const balance  = data.success ? (parseFloat(data.summary?.balance)        || 0) : 0;
             const cats     = data.success ? (data.summary?.expense_by_category || [])       : [];
+            App._conversionRate = data.success ? (parseFloat(data.summary?.conversion_rate) || 1) : 1;
 
             // Animate the numbers
             const incEl  = document.getElementById('dash-income');
@@ -332,7 +333,7 @@ const Dashboard = {
                 return '<tr>' +
                     '<td style="color:var(--tx-muted);font-size:0.8rem;">' + date.toLocaleDateString('en-US', {month:'short',day:'numeric'}) + '</td>' +
                     '<td><span class="badge ' + (isIncome ? 'success' : 'danger') + '" style="font-size:0.68rem;">' + (t.category_name || 'Other') + '</span></td>' +
-                    '<td style="font-weight:700;color:' + (isIncome ? 'var(--c-success)' : 'var(--c-danger)') + ';">' + (isIncome ? '+' : '−') + App.formatCurrency(t.amount) + '</td>' +
+                    '<td style="font-weight:700;color:' + (isIncome ? 'var(--c-success)' : 'var(--c-danger)') + ';">' + (isIncome ? '+' : '−') + App.formatCurrency(t.amount * (App._conversionRate || 1)) + '</td>' +
                 '</tr>';
             }).join('');
         } catch(e) { console.error('Recent tx error:', e); }
